@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Download Excel</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</head>
+<body>
+<button id="downloadButton" onclick="downloadExcel()">
+  Download Excel
+</button>
+
+<script>
+  const apiURL = "http://localhost:8080/api/download/excel";
+
+  function downloadExcel() {
+    $.ajax({
+      url: apiURL,
+      method: "GET",
+      xhrFields: {
+        responseType: "blob" // Đảm bảo dữ liệu trả về là blob (tệp dữ liệu nhị phân)
+      },
+      success: function (data) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const arrayBuffer = event.target.result;
+          const workbook = XLSX.read(arrayBuffer, {type: "array"});
+
+          // Hiển thị tệp Excel trong trình duyệt
+          const wopts = {bookType: "xlsx", bookSST: false, type: "binary"};
+          const excelData = XLSX.write(workbook, wopts);
+          const blob = new Blob([s2ab(excelData)], {type: "application/octet-stream"});
+          const url = URL.createObjectURL(blob);
+
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = "file.xlsx";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          window.URL.revokeObjectURL(url);
+        };
+        reader.readAsArrayBuffer(data);
+      },
+      error: function (error) {
+        console.error("Lỗi khi tải xuống tệp Excel:", error);
+      },
+    });
+  }
+
+  function s2ab(s) {
+    const buf = new ArrayBuffer(s.length);
+    const view = new Uint8Array(buf);
+    for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+    return buf;
+  }
+</script>
+</body>
+</html>
