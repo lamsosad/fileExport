@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link rel="stylesheet" th:href="@{/public/css/search.css}"/>
+</head>
+<body>
+<div
+        style="
+          display: flex;
+          justify-content: space-around;
+          padding-top: 50px;
+          margin-bottom: 50px;
+        "
+>
+  <a th:href="@{/system/homePage}"
+  >
+    <button
+            class="btn_home"
+            style="border: none; background: none; font-size: 20px"
+    >
+      <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-box-arrow-left"
+              viewBox="0 0 16 16"
+      >
+        <path
+                fill-rule="evenodd"
+                d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0v2z"
+        />
+        <path
+                fill-rule="evenodd"
+                d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z"
+        />
+      </svg>
+      Quay lại trang chủ
+    </button>
+  </a
+  >
+  <button class="btn_page2">Xuất mã đơn hàng</button>
+</div>
+<div class="manager">
+  <h1 class="title">Quản lí đơn hàng</h1>
+</div>
+  <div style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 5px;
+          margin-bottom: 30px;
+        ">
+    <input style="
+            width: 300px;
+            height: 30px;
+            border-radius: 20px;
+            padding: 0 10px;
+          " type="text" id="phoneNumber" name="phoneNumber" placeholder="Tìm kiếm theo số điện thoại..."/>
+    <input style="
+            width: 300px;
+            height: 30px;
+            border-radius: 20px;
+            padding: 0 10px;
+          " type="text" id="orderCode" name="orderCode" placeholder="Tìm kiếm theo mã đơn hàng..."/>
+    <select style=" height: 30px;padding: 5px;border-radius: 20px;border: 2px solid black; " id="status"
+            name="status">
+      <option type="checkbox" value="-1">Tất cả</option>
+      <option type="checkbox" value="0">Đơn hàng mới</option>
+      <option type="checkbox" value="1">Lưu kho</option>
+      <option type="checkbox" value="2">Giao hàng thành công</option>
+      <option type="checkbox" value="3">Giao hàng thất bại</option>
+
+      <option type="checkbox" value="4">Hoàn hàng</option>
+    </select>
+    <input style="
+            width: 300px;
+            height: 30px;
+            border-radius: 20px;
+            padding: 0 10px;
+          " type="text" id="wareHouseCode" name="wareHouseCode" placeholder="Mã kho hàng"/>
+    <div>
+      <select style=" height: 30px;padding: 5px;border-radius: 20px;border: 2px solid black; " id="sort" name="sort">
+        <option value="id,asc">Mặc định</option>
+        <option value="createdTime,desc">Ngày tạo giảm dần</option>
+        <option value="createdTime,asc">Ngày tạo tăng dần</option>
+        <option value="orderCode,desc">Mã đơn hàng giảm dần</option>
+        <option value="orderCode,asc">Mã đơn hàng tăng dần</option>
+      </select>
+    </div>
+
+    <input type="hidden" id="pageNumber" name="pageNumber" value="0"/>
+
+    <button class="search" onclick="searchOrders()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+      </svg>
+    </button>
+  </div>
+<div style="display: flex; justify-content: center; align-items: center">
+  <table>
+    <thead>
+    <tr>
+      <th>STT</th>
+      <th>Mã đơn hàng</th>
+      <th>Ngày tạo</th>
+      <th>Trạng thái</th>
+      <th>Mã kho</th>
+      <th>Tên NCC</th>
+      <th>Số điện thoại NCC</th>
+      <th>Tên Người nhận</th>
+      <th>Số điện thoại Người nhận</th>
+      <th>Thao tác</th>
+      <th>Chọn</th>
+    </tr>
+    </thead>
+    <tbody id="results">
+    </tbody>
+  </table>
+</div>
+<div style="margin-top: 10px;padding: 10px;">
+  <label for="pageSize">Kích thước trang:</label>
+  <select id="pageSize" name="pageSize">
+    <option value="10">10</option>
+    <option value="20">20</option>
+    <option value="50">50</option>
+    <option value="100">100</option>
+  </select>
+</div>
+<div class="pagination">
+  <button id="previousPage">&laquo; Trang trước</button>
+  <span id="currentPage"></span>
+  <button id="nextPage">Trang sau &raquo;</button>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/public/js/search.js}"></script>
+</body>
+</html>
